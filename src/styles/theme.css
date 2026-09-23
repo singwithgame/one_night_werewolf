@@ -77,11 +77,11 @@ body {
 
 .dark {
   /* === ElevenLabs DARK MODE (Night Phase) === */
-  --background: #0c0a09;
+  --background: #171717; /* softened from #0c0a09 */
   --foreground: #ffffff;
-  --card: #1c1917;
+  --card: #262626; /* softened from #1c1917 */
   --card-foreground: #ffffff;
-  --popover: #1c1917;
+  --popover: #262626;
   --popover-foreground: #ffffff;
 
   /* === Text Hierarchy (dark) === */
@@ -109,10 +109,10 @@ body {
   --success-foreground: #0c0a09;
 
   /* === Border & Input === */
-  --border: #292524;
-  --input: #292524;
-  --input-background: #1c1917;
-  --switch-background: #4e4e4e;
+  --border: #404040;
+  --input: #404040;
+  --input-background: #262626;
+  --switch-background: #525252;
   --ring: #a8a29e;
 }
 
