@@ -63,8 +63,8 @@ export default function SetupPage() {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500 w-full text-center">
       <div className="space-y-2">
-        <p className="text-caption-uppercase text-text-tertiary">입장 코드</p>
-        <h1 className="font-display text-display-xl text-primary tracking-widest">{roomId}</h1>
+        <p className="text-xs uppercase text-text-tertiary">입장 코드</p>
+        <h1 className="font-display text-5xl font-bold text-primary tracking-widest">{roomId}</h1>
       </div>
 
       <div className="w-full bg-surface-card border border-border rounded-xl p-6">

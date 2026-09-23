@@ -63,8 +63,8 @@ export default function VotingPage() {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500 w-full">
       <div className="text-center space-y-2">
-        <h1 className="font-display text-display-lg text-primary tracking-tight">Voting</h1>
-        <p className="text-body-md text-text-secondary">가장 의심스러운 플레이어를 지목하세요.</p>
+        <h1 className="font-display text-4xl font-bold text-primary tracking-tight">Voting</h1>
+        <p className="text-base text-text-secondary">가장 의심스러운 플레이어를 지목하세요.</p>
       </div>
 
       <div className="w-full bg-surface-card border border-border rounded-xl p-6 shadow-sm">

@@ -40,7 +40,7 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-col items-center justify-start space-y-6 animate-in fade-in duration-500 w-full h-full max-h-screen pt-4 pb-12">
       <div className="flex w-full justify-between items-center border-b border-border pb-4">
-        <h1 className="font-display text-display-sm text-primary tracking-tight">과거 기록 열람</h1>
+        <h1 className="font-display text-2xl font-bold text-primary tracking-tight">과거 기록 열람</h1>
         <button 
           onClick={() => setPhase('LOBBY')}
           className="px-4 py-2 bg-surface-card border-2 border-border text-foreground rounded-lg hover:bg-muted active:scale-95 transition-all font-medium"

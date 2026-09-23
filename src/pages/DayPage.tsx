@@ -55,8 +55,8 @@ export default function DayPage() {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700 w-full text-center">
       <div className="space-y-2">
-        <h1 className="font-display text-display-lg text-primary tracking-tight">Day Phase</h1>
-        <p className="text-body-md text-text-secondary">누가 늑대인간인지 토론하세요!</p>
+        <h1 className="font-display text-4xl font-bold text-primary tracking-tight">Day Phase</h1>
+        <p className="text-base text-text-secondary">누가 늑대인간인지 토론하세요!</p>
       </div>
 
       {/* 타이머 영역 */}

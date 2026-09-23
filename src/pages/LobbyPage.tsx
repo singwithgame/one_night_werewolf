@@ -54,8 +54,8 @@ export default function LobbyPage() {
     return (
       <div className="flex flex-col items-center justify-center space-y-12 animate-in fade-in zoom-in duration-500 w-full px-4">
         <div className="text-center space-y-3">
-          <h1 className="font-display text-display-xl text-primary tracking-tight">One Night</h1>
-          <p className="text-text-secondary text-body-lg">Ultimate Werewolf</p>
+          <h1 className="font-display text-5xl md:text-6xl text-primary tracking-tight font-bold">One Night</h1>
+          <p className="text-text-secondary text-xl md:text-2xl font-medium tracking-wide">Ultimate Werewolf</p>
         </div>
         
         <div className="flex flex-col w-full gap-4 max-w-sm">
@@ -86,14 +86,14 @@ export default function LobbyPage() {
     return (
       <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
         <div className="text-center">
-          <h2 className="font-display text-display-sm text-primary">기록 조회</h2>
+          <h2 className="font-display text-2xl font-bold text-primary">기록 조회</h2>
           <p className="text-sm text-text-secondary mt-1">과거 게임 기록을 열람하기 위한 관리자 비밀번호를 입력하세요.</p>
         </div>
         
         {error && <p className="text-destructive text-sm text-center bg-destructive/10 py-2 rounded-lg">{error}</p>}
 
         <div className="space-y-3">
-          <label className="text-caption-uppercase text-text-tertiary font-semibold tracking-wider">비밀번호</label>
+          <label className="text-xs uppercase text-text-tertiary font-semibold tracking-wider">비밀번호</label>
           <input 
             type="password" 
             value={password}
@@ -131,7 +131,7 @@ export default function LobbyPage() {
     return (
       <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
         <div className="text-center">
-          <h2 className="font-display text-display-sm text-primary">방 만들기</h2>
+          <h2 className="font-display text-2xl font-bold text-primary">방 만들기</h2>
           <p className="text-sm text-text-secondary mt-1">게임 설정을 선택하고 이름을 입력하세요.</p>
         </div>
         
@@ -139,7 +139,7 @@ export default function LobbyPage() {
 
         <div className="space-y-6">
           <div className="space-y-3">
-            <label className="text-caption-uppercase text-text-tertiary font-semibold tracking-wider">낮 페이즈 타이머</label>
+            <label className="text-xs uppercase text-text-tertiary font-semibold tracking-wider">낮 페이즈 타이머</label>
             <div className="grid grid-cols-3 gap-3">
               {[3, 5, 10].map(min => (
                 <button
@@ -158,7 +158,7 @@ export default function LobbyPage() {
           </div>
           
           <div className="space-y-3">
-            <label className="text-caption-uppercase text-text-tertiary font-semibold tracking-wider">나의 닉네임</label>
+            <label className="text-xs uppercase text-text-tertiary font-semibold tracking-wider">나의 닉네임</label>
             <input 
               type="text" 
               value={nickname}
@@ -169,7 +169,7 @@ export default function LobbyPage() {
           </div>
 
           <div className="space-y-3">
-            <label className="text-caption-uppercase text-text-tertiary font-semibold tracking-wider">방장 비밀번호</label>
+            <label className="text-xs uppercase text-text-tertiary font-semibold tracking-wider">방장 비밀번호</label>
             <input 
               type="password" 
               value={password}
@@ -202,7 +202,7 @@ export default function LobbyPage() {
   return (
     <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
       <div className="text-center">
-        <h2 className="font-display text-display-sm text-primary">방 참여하기</h2>
+        <h2 className="font-display text-2xl font-bold text-primary">방 참여하기</h2>
         <p className="text-sm text-text-secondary mt-1">초대받은 4자리 코드와 이름을 입력하세요.</p>
       </div>
       
@@ -210,18 +210,18 @@ export default function LobbyPage() {
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <label className="text-caption-uppercase text-text-tertiary font-semibold tracking-wider">입장 코드</label>
+          <label className="text-xs uppercase text-text-tertiary font-semibold tracking-wider">입장 코드</label>
           <input 
             type="text" 
             value={roomCodeInput}
             onChange={(e) => setRoomCodeInput(e.target.value)}
-            className="w-full bg-input-background border-2 border-border rounded-xl px-5 py-4 text-primary font-display text-center text-display-sm tracking-[0.5em] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary uppercase transition-colors"
+            className="w-full bg-input-background border-2 border-border rounded-xl px-5 py-4 text-primary font-display text-center text-2xl font-bold tracking-[0.5em] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary uppercase transition-colors"
             placeholder="ABCD"
             maxLength={4}
           />
         </div>
         <div className="space-y-3">
-          <label className="text-caption-uppercase text-text-tertiary font-semibold tracking-wider">나의 닉네임</label>
+          <label className="text-xs uppercase text-text-tertiary font-semibold tracking-wider">나의 닉네임</label>
           <input 
             type="text" 
             value={nickname}

@@ -297,8 +297,8 @@ export default function NightPage() {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700 w-full">
       <div className="text-center space-y-2">
-        <h1 className="font-display text-display-lg text-primary">Night Phase</h1>
-        <p className="text-body-md text-text-secondary">모두가 행동을 마칠 때까지 기다립니다.</p>
+        <h1 className="font-display text-4xl font-bold text-primary">Night Phase</h1>
+        <p className="text-base text-text-secondary">모두가 행동을 마칠 때까지 기다립니다.</p>
       </div>
 
       <div className="w-full bg-surface-dark-elevated border border-border rounded-xl p-8 flex flex-col items-center justify-start min-h-[400px] transition-all relative overflow-hidden">
@@ -324,7 +324,7 @@ export default function NightPage() {
           <div className="flex flex-col items-center space-y-4 text-center w-full">
             <div className="space-y-1 mb-2">
               <p className="text-text-secondary text-sm uppercase tracking-widest">당신의 역할</p>
-              <h2 className="text-display-md text-primary font-display">
+              <h2 className="text-3xl font-bold text-primary font-display">
                 {activeRole ? roleNameMap[activeRole] : '...'}
                 {myRole === 'DOPPELGANGER' && activeRole !== 'DOPPELGANGER' && ' (도플갱어)'}
               </h2>

@@ -63,8 +63,8 @@ export default function NightResultPage() {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500 w-full text-center">
       <div className="space-y-2">
-        <h1 className="font-display text-display-lg text-primary tracking-tight">Night Result</h1>
-        <p className="text-body-md text-text-secondary">간밤에 일어난 결과를 확인하세요.</p>
+        <h1 className="font-display text-4xl font-bold text-primary tracking-tight">Night Result</h1>
+        <p className="text-base text-text-secondary">간밤에 일어난 결과를 확인하세요.</p>
       </div>
 
       <div className="w-full bg-surface-card border border-border rounded-xl p-8 shadow-sm">
