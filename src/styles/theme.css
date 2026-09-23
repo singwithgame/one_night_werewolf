@@ -1,0 +1,160 @@
+@custom-variant dark (&:is(.dark *));
+
+/* === Smooth Transition for Day/Night Shift === */
+:root {
+  --transition-duration: 700ms;
+  --transition-timing: ease-in-out;
+}
+
+body {
+  transition: background-color var(--transition-duration) var(--transition-timing),
+              color var(--transition-duration) var(--transition-timing);
+}
+
+* {
+  transition: background-color var(--transition-duration) var(--transition-timing),
+              border-color var(--transition-duration) var(--transition-timing),
+              color var(--transition-duration) var(--transition-timing);
+}
+
+:root {
+  --font-size: 16px;
+
+  /* === ElevenLabs LIGHT MODE (Day Phase) === */
+  --brand: #292524;
+  --primary: #292524;
+  --primary-foreground: #ffffff;
+
+  /* === Surface & Background === */
+  --background: #f5f5f5;
+  --foreground: #292524;
+  --card: #ffffff;
+  --card-foreground: #292524;
+  --popover: #ffffff;
+  --popover-foreground: #292524;
+
+  /* === Secondary & Muted === */
+  --secondary: #fafafa;
+  --secondary-foreground: #292524;
+  --muted: #f0efed;
+  --muted-foreground: #777169;
+  --accent: #e7e5e4;
+  --accent-foreground: #0c0a09;
+
+  /* === Status Colors === */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+
+  /* === Text Hierarchy === */
+  --text-primary: #0c0a09;
+  --text-secondary: #4e4e4e;
+  --text-tertiary: #777169;
+  --text-disabled: #a8a29e;
+  --icon-default: #4e4e4e;
+
+  /* === Borders & Inputs === */
+  --border: #d6d3d1;
+  --input: #e7e5e4;
+  --input-background: #ffffff;
+  --switch-background: #d6d3d1;
+
+  /* === Typography === */
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* === Focus Ring === */
+  --ring: #292524;
+
+  /* === Radius === */
+  --radius: 0.75rem; /* 12px */
+}
+
+.dark {
+  /* === ElevenLabs DARK MODE (Night Phase) === */
+  --background: #0c0a09;
+  --foreground: #ffffff;
+  --card: #1c1917;
+  --card-foreground: #ffffff;
+  --popover: #1c1917;
+  --popover-foreground: #ffffff;
+
+  /* === Text Hierarchy (dark) === */
+  --text-primary: #ffffff;
+  --text-secondary: #a8a29e;
+  --text-tertiary: #777169;
+  --text-disabled: #4e4e4e;
+  --icon-default: #a8a29e;
+
+  /* === Key Color & Status (brightened for dark mode) === */
+  --brand: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #0c0a09;
+  
+  --secondary: #292524;
+  --secondary-foreground: #ffffff;
+  --muted: #292524;
+  --muted-foreground: #a8a29e;
+  --accent: #292524;
+  --accent-foreground: #ffffff;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #0c0a09;
+  --success: #22c55e;
+  --success-foreground: #0c0a09;
+
+  /* === Border & Input === */
+  --border: #292524;
+  --input: #292524;
+  --input-background: #1c1917;
+  --switch-background: #4e4e4e;
+  --ring: #a8a29e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-brand: var(--brand);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-icon-default: var(--icon-default);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
