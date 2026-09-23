@@ -1,6 +1,5 @@
 import { ref, set, get, child, update, onValue, off } from 'firebase/database';
 import { db } from '../lib/firebase';
-import { GamePhase } from '../store/gameStore';
 
 // 4자리 랜덤 알파벳 방 코드 생성
 const generateRoomCode = () => {

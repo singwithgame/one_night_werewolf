@@ -35,7 +35,7 @@ export default function SetupPage() {
     try {
       // startGame 함수에서 역할 분배와 phase 변경('NIGHT')을 모두 처리함
       const { startGame } = await import('../services/gameService');
-      await startGame(roomId, players);
+      await startGame(roomId as string, players);
     } catch (e) {
       console.error(e);
       alert("게임 시작 중 오류가 발생했습니다.");

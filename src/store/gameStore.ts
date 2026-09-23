@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type GamePhase = 'LOBBY' | 'SETUP' | 'NIGHT' | 'DAY' | 'VOTING' | 'END';
+export type GamePhase = 'LOBBY' | 'SETUP' | 'NIGHT' | 'NIGHT_RESULT' | 'DAY' | 'VOTING' | 'END';
 
 interface GameState {
   roomId: string | null;
