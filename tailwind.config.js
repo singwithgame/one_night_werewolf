@@ -9,7 +9,10 @@ export default {
     extend: {
       colors: {
         border: "var(--border)",
-        input: "var(--input)",
+        input: {
+          DEFAULT: "var(--input)",
+          background: "var(--input-background)",
+        },
         ring: "var(--ring)",
         background: "var(--background)",
         foreground: "var(--foreground)",
@@ -40,6 +43,15 @@ export default {
         card: {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
+        },
+        surface: {
+          card: "var(--card)",
+        },
+        text: {
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          tertiary: "var(--text-tertiary)",
+          disabled: "var(--text-disabled)",
         },
       },
       borderRadius: {

@@ -13,7 +13,8 @@ export default function NightPage() {
   const [activeRole, setActiveRole] = useState<Role | null>(null); // 도플갱어 복사 시 변경됨
   const [players, setPlayers] = useState<{ uid: string; nickname: string }[]>([]);
   
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [roleViewStage, setRoleViewStage] = useState<'HIDDEN' | 'REVEALED' | 'ACTION'>('HIDDEN');
+  const [seerMode, setSeerMode] = useState<'PLAYER' | 'CENTER'>('PLAYER');
   const [actionDone, setActionDone] = useState(false);
   const [readyCount, setReadyCount] = useState(0);
   const [totalPlayers, setTotalPlayers] = useState(0);
@@ -140,26 +141,34 @@ export default function NightPage() {
       case 'SEER':
         return (
           <div className="space-y-4 w-full">
-            <p className="text-sm text-text-secondary">다른 사람 1명 또는 중앙 2장을 선택하세요.</p>
-            <div className="space-y-2">
-              <h4 className="text-xs text-text-tertiary">플레이어</h4>
+            <p className="text-sm text-text-secondary">다른 사람의 카드 1장 또는 중앙 카드 2장을 확인하세요.</p>
+            <div className="flex gap-4 mb-4">
+              <button 
+                onClick={() => setSeerMode('PLAYER')}
+                className={`flex-1 py-2 rounded-lg border font-medium ${seerMode === 'PLAYER' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border'}`}
+              >
+                플레이어 1명
+              </button>
+              <button 
+                onClick={() => setSeerMode('CENTER')}
+                className={`flex-1 py-2 rounded-lg border font-medium ${seerMode === 'CENTER' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border'}`}
+              >
+                중앙 2장
+              </button>
+            </div>
+            {seerMode === 'PLAYER' ? (
               <div className="grid grid-cols-2 gap-2">
                 {otherPlayers.map(p => (
                   <button 
                     key={p.uid}
-                    onClick={() => {
-                      setSelectedTargets([p.uid]);
-                      setSelectedCenters([]);
-                    }}
+                    onClick={() => setSelectedTargets([p.uid])}
                     className={`p-3 rounded-lg border ${selectedTargets.includes(p.uid) ? 'border-primary bg-primary/10' : 'border-border bg-input-background'}`}
                   >
                     {p.nickname}
                   </button>
                 ))}
               </div>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-xs text-text-tertiary">중앙 카드</h4>
+            ) : (
               <div className="grid grid-cols-3 gap-2">
                 {[0, 1, 2].map(idx => (
                   <button
@@ -169,7 +178,6 @@ export default function NightPage() {
                         ? selectedCenters.filter(i => i !== idx)
                         : [...selectedCenters, idx].slice(-2);
                       setSelectedCenters(newCenters);
-                      setSelectedTargets([]);
                     }}
                     className={`p-3 rounded-lg border ${selectedCenters.includes(idx) ? 'border-primary bg-primary/10' : 'border-border bg-input-background'}`}
                   >
@@ -177,10 +185,13 @@ export default function NightPage() {
                   </button>
                 ))}
               </div>
-            </div>
+            )}
             <button 
-              onClick={() => submitAction({ type: 'SEER', targets: selectedTargets, centers: selectedCenters })}
-              disabled={(selectedTargets.length !== 1 && selectedCenters.length !== 2)}
+              onClick={() => {
+                if (seerMode === 'PLAYER') submitAction({ type: 'SEER', targets: selectedTargets });
+                else submitAction({ type: 'SEER', centers: selectedCenters });
+              }}
+              disabled={seerMode === 'PLAYER' ? selectedTargets.length !== 1 : selectedCenters.length !== 2}
               className="w-full bg-primary text-primary-foreground py-3 rounded-full font-medium disabled:opacity-50 mt-4"
             >
               선택 완료
@@ -301,46 +312,66 @@ export default function NightPage() {
         <p className="text-base text-text-secondary">모두가 행동을 마칠 때까지 기다립니다.</p>
       </div>
 
-      <div className="w-full bg-surface-dark-elevated border border-border rounded-xl p-8 flex flex-col items-center justify-start min-h-[400px] transition-all relative overflow-hidden">
+      <div className="w-full bg-surface-dark-elevated border border-border rounded-xl p-8 flex flex-col items-center justify-start min-h-[400px] transition-all relative overflow-hidden shadow-lg">
         
-        {/* 블라인드 레이어 */}
-        {!isRevealed && !actionDone && (
-          <div className="absolute inset-0 z-10 bg-background flex flex-col items-center justify-center p-6 space-y-6">
-            <p className="text-text-tertiary text-sm">자신의 차례나 행동을 완료하기 위해 아래 버튼을 누르세요.</p>
-            <button 
-              onPointerDown={() => setIsRevealed(true)}
-              onPointerUp={() => setIsRevealed(false)}
-              onPointerLeave={() => setIsRevealed(false)}
-              onContextMenu={(e) => e.preventDefault()}
-              className="px-8 py-4 bg-primary text-primary-foreground font-medium rounded-full shadow-lg select-none touch-none hover:scale-105 active:scale-95 transition-transform"
-            >
-              버튼을 누르고 있는 동안 역할 및 액션 확인
-            </button>
-          </div>
-        )}
-
-        {/* 액션 수행 */}
         {!actionDone ? (
-          <div className="flex flex-col items-center space-y-4 text-center w-full">
-            <div className="space-y-1 mb-2">
-              <p className="text-text-secondary text-sm uppercase tracking-widest">당신의 역할</p>
-              <h2 className="text-3xl font-bold text-primary font-display">
-                {activeRole ? roleNameMap[activeRole] : '...'}
-                {myRole === 'DOPPELGANGER' && activeRole !== 'DOPPELGANGER' && ' (도플갱어)'}
-              </h2>
-            </div>
-            
-            {renderActiveAction()}
+          <>
+            {roleViewStage === 'HIDDEN' && (
+              <div className="flex flex-col items-center justify-center h-full space-y-6 flex-1 py-12">
+                <p className="text-text-tertiary text-sm text-center px-4">
+                  실제 오프라인 게임처럼, 직업 카드는 <strong className="text-foreground">단 한 번만</strong> 확인할 수 있습니다.
+                </p>
+                <button 
+                  onClick={() => setRoleViewStage('REVEALED')}
+                  className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl shadow-md hover:scale-105 active:scale-95 transition-transform"
+                >
+                  내 직업 확인하기
+                </button>
+              </div>
+            )}
 
-          </div>
+            {roleViewStage === 'REVEALED' && (
+              <div className="flex flex-col items-center justify-center h-full space-y-8 flex-1 py-12 animate-in fade-in zoom-in duration-300">
+                <div className="space-y-2 text-center">
+                  <p className="text-text-secondary text-sm uppercase tracking-widest">당신의 역할</p>
+                  <h2 className="text-5xl font-bold text-primary font-display">
+                    {myRole ? roleNameMap[myRole] : '...'}
+                  </h2>
+                </div>
+                <button 
+                  onClick={() => setRoleViewStage('ACTION')}
+                  className="px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-primary-foreground active:scale-95 transition-all shadow-sm"
+                >
+                  행동 시작하기 (다시 볼 수 없음)
+                </button>
+              </div>
+            )}
+
+            {roleViewStage === 'ACTION' && (
+              <div className="flex flex-col items-center space-y-6 text-center w-full animate-in slide-in-from-bottom-4 duration-300">
+                <div className="space-y-1 mb-2">
+                  <h2 className="text-2xl font-bold text-foreground">행동 페이즈</h2>
+                  <p className="text-sm text-text-tertiary">정해진 능력을 수행하세요.</p>
+                </div>
+                
+                {myRole === 'DOPPELGANGER' && activeRole !== 'DOPPELGANGER' && (
+                  <div className="bg-primary/10 border border-primary/30 text-primary px-4 py-2 rounded-lg font-medium text-sm">
+                    현재 복사한 직업: {activeRole ? roleNameMap[activeRole] : ''}
+                  </div>
+                )}
+
+                {renderActiveAction()}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <div className="flex flex-col items-center justify-center h-full space-y-4 flex-1 py-12">
+            <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-text-primary text-lg font-medium">행동을 완료했습니다.</p>
+            <p className="text-text-primary text-xl font-bold">행동을 완료했습니다.</p>
             <p className="text-text-secondary">다른 플레이어를 기다리는 중... ({readyCount} / {totalPlayers})</p>
           </div>
         )}
@@ -349,9 +380,9 @@ export default function NightPage() {
       {isHost && (
         <button 
           onClick={skipToResolution}
-          className="px-6 py-3 border border-border rounded-full text-text-tertiary hover:bg-muted transition-colors"
+          className="px-6 py-3 border border-border rounded-full text-text-tertiary hover:bg-muted active:scale-95 transition-all text-sm font-medium mt-4"
         >
-          페이즈 강제 넘기기 (결과 확인으로)
+          모든 행동 스킵하고 결과로 넘어가기
         </button>
       )}
     </div>
