@@ -56,7 +56,7 @@ export default function LobbyPage() {
         <div className="text-center space-y-3">
           <h1 className="font-display text-5xl md:text-6xl text-primary tracking-tight font-bold">One Night</h1>
           <p className="text-text-secondary text-xl md:text-2xl font-medium tracking-wide">Ultimate Werewolf</p>
-          <p className="text-xs text-text-tertiary font-semibold uppercase tracking-widest bg-border/50 inline-block px-3 py-1 rounded-full mt-2">3~13 Players</p>
+          <p className="text-xs text-text-tertiary font-semibold uppercase tracking-widest bg-border/50 inline-block px-3 py-1 rounded-full mt-2">3~10 Players</p>
         </div>
         
         <div className="flex flex-col w-full gap-4 max-w-sm">

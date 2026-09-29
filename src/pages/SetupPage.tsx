@@ -118,7 +118,7 @@ export default function SetupPage() {
   const handleStartGame = async () => {
     if (!isHost) return;
     if (players.length < 3 || players.length > 13) {
-      alert("플레이어는 3~13명이어야 합니다.");
+      alert("플레이어는 3~10명이어야 합니다.");
       return;
     }
     if (!isDeckValid) {
@@ -150,7 +150,7 @@ export default function SetupPage() {
 
       <div className="w-full bg-surface-card border border-border rounded-xl p-6">
         <h3 className="font-medium text-text-secondary mb-4 flex justify-between items-center">
-          <span>참가자 목록 ({players.length}/13명)</span>
+          <span>참가자 목록 ({players.length}/10명)</span>
           <span className="text-xs text-text-tertiary">최소 3명 필요</span>
         </h3>
         <ul className="space-y-2">
