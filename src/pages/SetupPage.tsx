@@ -88,11 +88,19 @@ export default function SetupPage() {
     if (!roleDef) return;
 
     let newDeck = [...deck];
-    if (delta > 0 && count < roleDef.max) {
-      newDeck.push(roleId);
-    } else if (delta < 0 && count > 0) {
-      const idx = newDeck.indexOf(roleId);
-      if (idx > -1) newDeck.splice(idx, 1);
+    if (roleId === 'MASON') {
+      if (delta > 0 && count === 0) {
+        newDeck.push('MASON', 'MASON');
+      } else if (delta < 0 && count === 2) {
+        newDeck = newDeck.filter(r => r !== 'MASON');
+      }
+    } else {
+      if (delta > 0 && count < roleDef.max) {
+        newDeck.push(roleId);
+      } else if (delta < 0 && count > 0) {
+        const idx = newDeck.indexOf(roleId);
+        if (idx > -1) newDeck.splice(idx, 1);
+      }
     }
     
     // DB 동기화
@@ -105,11 +113,19 @@ export default function SetupPage() {
     const base: Role[] = ['WEREWOLF', 'SEER', 'ROBBER', 'TROUBLEMAKER'];
     base.forEach(r => newDeck.push(r));
     
-    while (newDeck.length < requiredCards) {
+    let attempts = 0;
+    while (newDeck.length < requiredCards && attempts < 100) {
+      attempts++;
       const randomRole = AVAILABLE_ROLES[Math.floor(Math.random() * AVAILABLE_ROLES.length)];
       const currentCount = newDeck.filter(r => r === randomRole.id).length;
-      if (currentCount < randomRole.max) {
-        newDeck.push(randomRole.id);
+      if (randomRole.id === 'MASON') {
+        if (currentCount === 0 && newDeck.length + 2 <= requiredCards) {
+          newDeck.push('MASON', 'MASON');
+        }
+      } else {
+        if (currentCount < randomRole.max) {
+          newDeck.push(randomRole.id);
+        }
       }
     }
     await update(ref(db, `rooms/${roomId}/settings`), { deck: newDeck });

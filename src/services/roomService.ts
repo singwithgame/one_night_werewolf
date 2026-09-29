@@ -1,11 +1,11 @@
 import { ref, set, get, child, update, onValue, off } from 'firebase/database';
 import { db } from '../lib/firebase';
 
-// 4자리 랜덤 알파벳 방 코드 생성
+// 6자리 랜덤 숫자 방 코드 생성
 const generateRoomCode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const chars = '0123456789';
   let result = '';
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;

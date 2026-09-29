@@ -61,16 +61,16 @@ export default function LobbyPage() {
         
         <div className="flex flex-col w-full gap-4 max-w-sm">
           <button 
-            onClick={() => { setMode('HOST'); setError(''); setPassword(''); }}
+            onClick={() => { setMode('JOIN'); setError(''); }}
             className="w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-lg"
           >
-            새로운 방 만들기 (Host)
+            기존 방에 참여하기 (Join)
           </button>
           <button 
-            onClick={() => { setMode('JOIN'); setError(''); }}
+            onClick={() => { setMode('HOST'); setError(''); setPassword(''); }}
             className="w-full bg-surface-card border-2 border-border text-foreground py-4 rounded-xl font-bold tracking-wide hover:border-primary/50 hover:bg-primary/5 active:scale-95 transition-all shadow-md"
           >
-            기존 방에 참여하기 (Join)
+            새로운 방 만들기 (Host)
           </button>
           <button 
             onClick={() => { setMode('HISTORY'); setError(''); setPassword(''); }}
@@ -204,7 +204,7 @@ export default function LobbyPage() {
     <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
       <div className="text-center">
         <h2 className="font-display text-2xl font-bold text-primary">방 참여하기</h2>
-        <p className="text-sm text-text-secondary mt-1">초대받은 4자리 코드와 이름을 입력하세요.</p>
+        <p className="text-sm text-text-secondary mt-1">초대받은 6자리 코드와 이름을 입력하세요.</p>
       </div>
       
       {error && <p className="text-destructive text-sm text-center bg-destructive/10 py-2 rounded-lg">{error}</p>}
@@ -217,8 +217,8 @@ export default function LobbyPage() {
             value={roomCodeInput}
             onChange={(e) => setRoomCodeInput(e.target.value)}
             className="w-full bg-input-background border-2 border-border rounded-xl px-5 py-4 text-primary font-display text-center text-2xl font-bold tracking-[0.5em] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary uppercase transition-colors"
-            placeholder="ABCD"
-            maxLength={4}
+            placeholder="123456"
+            maxLength={6}
           />
         </div>
         <div className="space-y-3">

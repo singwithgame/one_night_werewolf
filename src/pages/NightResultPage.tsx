@@ -58,6 +58,20 @@ export default function NightResultPage() {
   const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
+    if (!roomId) return;
+    const phaseRef = ref(db, `rooms/${roomId}/info/phase`);
+    const unsubscribe = onValue(phaseRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const newPhase = snapshot.val();
+        if (newPhase !== 'NIGHT_RESULT' && newPhase !== 'NIGHT') {
+          useGameStore.getState().setPhase(newPhase);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [roomId]);
+
+  useEffect(() => {
     // 플레이어들이 모두 확인했는지 카운트만 계산
     if (!roomId || !isHost) return;
     const readyRef = ref(db, `rooms/${roomId}/game/resultReady`);
@@ -237,11 +251,18 @@ const calculateNightActions = async (roomId: string) => {
     }
   });
 
-  // 3. 불면증(Insomniac) 및 늑대/미니언/메이슨 동료 확인 (초기 역할 및 현재 역할 기반)
-  Object.keys(data.initialRoles).forEach(uid => {
-    const r = data.initialRoles[uid];
+  // 3. 불면증(Insomniac) 및 늑대/미니언/메이슨 동료 확인 (도플갱어가 복사한 직업 포함)
+  const nightRoles = { ...data.initialRoles };
+  Object.keys(actions).forEach(uid => {
+    if (uid.includes('_doppelganger')) {
+      nightRoles[uid.replace('_doppelganger', '')] = actions[uid].copiedRole;
+    }
+  });
+
+  Object.keys(nightRoles).forEach(uid => {
+    const r = nightRoles[uid];
     if (r === 'WEREWOLF') {
-      const wolves = Object.keys(data.initialRoles).filter(k => data.initialRoles[k] === 'WEREWOLF' && k !== uid);
+      const wolves = Object.keys(nightRoles).filter(k => nightRoles[k] === 'WEREWOLF' && k !== uid);
       if (wolves.length > 0) {
         results[uid] = (results[uid] ? results[uid] + '\n' : '') + `다른 늑대인간: ${wolves.map(getNickname).join(', ')}`;
       } else {
@@ -253,7 +274,7 @@ const calculateNightActions = async (roomId: string) => {
       }
     }
     else if (r === 'MINION') {
-      const wolves = Object.keys(data.initialRoles).filter(k => data.initialRoles[k] === 'WEREWOLF');
+      const wolves = Object.keys(nightRoles).filter(k => nightRoles[k] === 'WEREWOLF');
       if (wolves.length > 0) {
         results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신이 돕고 있는 늑대인간: ${wolves.map(getNickname).join(', ')}`;
       } else {
@@ -261,7 +282,7 @@ const calculateNightActions = async (roomId: string) => {
       }
     }
     else if (r === 'MASON') {
-      const masons = Object.keys(data.initialRoles).filter(k => data.initialRoles[k] === 'MASON' && k !== uid);
+      const masons = Object.keys(nightRoles).filter(k => nightRoles[k] === 'MASON' && k !== uid);
       if (masons.length > 0) {
         results[uid] = (results[uid] ? results[uid] + '\n' : '') + `다른 프리메이슨: ${masons.map(getNickname).join(', ')}`;
       } else {
