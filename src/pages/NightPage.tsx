@@ -39,7 +39,7 @@ export default function NightPage() {
     const unsubscribe = onValue(phaseRef, (snapshot) => {
       if (snapshot.exists()) {
         const newPhase = snapshot.val();
-        if (newPhase !== 'NIGHT' && newPhase !== 'SETUP') {
+        if (newPhase !== 'NIGHT') {
           setPhase(newPhase);
         }
       }

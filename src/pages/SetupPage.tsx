@@ -66,7 +66,7 @@ export default function SetupPage() {
     const unsubscribe = onValue(phaseRef, (snapshot) => {
       if (snapshot.exists()) {
         const newPhase = snapshot.val();
-        if (newPhase !== 'SETUP' && newPhase !== 'LOBBY') {
+        if (newPhase !== 'SETUP') {
           setPhase(newPhase);
         }
       }

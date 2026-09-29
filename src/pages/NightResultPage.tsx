@@ -4,7 +4,7 @@ import { db, getLocalUid } from '../lib/firebase';
 import { useGameStore } from '../store/gameStore';
 
 export default function NightResultPage() {
-  const { roomId, isHost } = useGameStore();
+  const { roomId, isHost, setPhase } = useGameStore();
   const uid = getLocalUid();
 
 
@@ -76,13 +76,13 @@ export default function NightResultPage() {
     const unsubscribe = onValue(phaseRef, (snapshot) => {
       if (snapshot.exists()) {
         const newPhase = snapshot.val();
-        if (newPhase !== 'NIGHT_RESULT' && newPhase !== 'NIGHT') {
-          useGameStore.getState().setPhase(newPhase);
+        if (newPhase !== 'NIGHT_RESULT') {
+          setPhase(newPhase);
         }
       }
     });
     return () => unsubscribe();
-  }, [roomId]);
+  }, [roomId, setPhase]);
 
   useEffect(() => {
     // 플레이어들이 모두 확인했는지 카운트만 계산

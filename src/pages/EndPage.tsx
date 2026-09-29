@@ -4,7 +4,7 @@ import { db } from '../lib/firebase';
 import { useGameStore } from '../store/gameStore';
 
 export default function EndPage() {
-  const { roomId, isHost } = useGameStore();
+  const { roomId, isHost, setPhase } = useGameStore();
   const [votes, setVotes] = useState<Record<string, string>>({});
   const [players, setPlayers] = useState<Record<string, any>>({});
   const [initialRoles, setInitialRoles] = useState<Record<string, string>>({});
@@ -15,6 +15,18 @@ export default function EndPage() {
     ROBBER: '강도', TROUBLEMAKER: '말썽쟁이', DRUNK: '주정뱅이', INSOMNIAC: '불면증환자',
     HUNTER: '사냥꾼', TANNER: '무두장이', VILLAGER: '마을주민', DOPPELGANGER: '도플갱어'
   };
+
+  useEffect(() => {
+    if (!roomId) return;
+    const phaseRef = ref(db, `rooms/${roomId}/info/phase`);
+    const unsubPhase = onValue(phaseRef, (snap) => {
+      if (snap.exists()) {
+        const newPhase = snap.val();
+        if (newPhase !== 'END') setPhase(newPhase);
+      }
+    });
+    return () => unsubPhase();
+  }, [roomId, setPhase]);
 
   useEffect(() => {
     if (!roomId) return;

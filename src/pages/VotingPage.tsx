@@ -4,12 +4,26 @@ import { db, getLocalUid } from '../lib/firebase';
 import { useGameStore } from '../store/gameStore';
 
 export default function VotingPage() {
-  const { roomId, isHost } = useGameStore();
+  const { roomId, isHost, setPhase } = useGameStore();
   const uid = getLocalUid();
   
   const [players, setPlayers] = useState<{ uid: string; nickname: string }[]>([]);
   const [votes, setVotes] = useState<Record<string, string>>({});
   const myVote = votes[uid];
+
+  useEffect(() => {
+    if (!roomId) return;
+    const phaseRef = ref(db, `rooms/${roomId}/info/phase`);
+    const unsubPhase = onValue(phaseRef, (snap) => {
+      if (snap.exists()) {
+        const newPhase = snap.val();
+        
+        if (newPhase !== 'VOTING') setPhase(newPhase);
+
+      }
+    });
+    return () => unsubPhase();
+  }, [roomId, setPhase]);
 
   useEffect(() => {
     if (!roomId) return;
