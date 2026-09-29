@@ -315,55 +315,23 @@ export default function NightPage() {
       <div className="w-full bg-surface-dark-elevated border border-border rounded-xl p-8 flex flex-col items-center justify-start min-h-[400px] transition-all relative overflow-hidden shadow-lg">
         
         {!actionDone ? (
-          <>
-            {roleViewStage === 'HIDDEN' && (
-              <div className="flex flex-col items-center justify-center h-full space-y-6 flex-1 py-12">
-                <p className="text-text-tertiary text-sm text-center px-4">
-                  실제 오프라인 게임처럼, 직업 카드는 <strong className="text-foreground">단 한 번만</strong> 확인할 수 있습니다.
-                </p>
-                <button 
-                  onClick={() => setRoleViewStage('REVEALED')}
-                  className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl shadow-md hover:scale-105 active:scale-95 transition-transform"
-                >
-                  내 직업 확인하기
-                </button>
-              </div>
-            )}
-
-            {roleViewStage === 'REVEALED' && (
-              <div className="flex flex-col items-center justify-center h-full space-y-8 flex-1 py-12 animate-in fade-in zoom-in duration-300">
-                <div className="space-y-2 text-center">
-                  <p className="text-text-secondary text-sm uppercase tracking-widest">당신의 역할</p>
-                  <h2 className="text-5xl font-bold text-primary font-display">
-                    {myRole ? roleNameMap[myRole] : '...'}
-                  </h2>
+          <div className="flex flex-col items-center space-y-6 text-center w-full animate-in slide-in-from-bottom-4 duration-300">
+            <div className="space-y-2 text-center mb-2">
+              <p className="text-text-secondary text-sm uppercase tracking-widest">당신의 역할</p>
+              <h2 className="text-5xl font-bold text-primary font-display">
+                {myRole ? roleNameMap[myRole] : '...'}
+              </h2>
+            </div>
+            
+            <div className="w-full border-t border-border/50 pt-6">
+              {myRole === 'DOPPELGANGER' && activeRole !== 'DOPPELGANGER' && (
+                <div className="bg-primary/10 border border-primary/30 text-primary px-4 py-2 rounded-lg font-medium text-sm mb-6 inline-block">
+                  현재 복사한 직업: {activeRole ? roleNameMap[activeRole] : ''}
                 </div>
-                <button 
-                  onClick={() => setRoleViewStage('ACTION')}
-                  className="px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-primary-foreground active:scale-95 transition-all shadow-sm"
-                >
-                  행동 시작하기 (다시 볼 수 없음)
-                </button>
-              </div>
-            )}
-
-            {roleViewStage === 'ACTION' && (
-              <div className="flex flex-col items-center space-y-6 text-center w-full animate-in slide-in-from-bottom-4 duration-300">
-                <div className="space-y-1 mb-2">
-                  <h2 className="text-2xl font-bold text-foreground">행동 페이즈</h2>
-                  <p className="text-sm text-text-tertiary">정해진 능력을 수행하세요.</p>
-                </div>
-                
-                {myRole === 'DOPPELGANGER' && activeRole !== 'DOPPELGANGER' && (
-                  <div className="bg-primary/10 border border-primary/30 text-primary px-4 py-2 rounded-lg font-medium text-sm">
-                    현재 복사한 직업: {activeRole ? roleNameMap[activeRole] : ''}
-                  </div>
-                )}
-
-                {renderActiveAction()}
-              </div>
-            )}
-          </>
+              )}
+              {renderActiveAction()}
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full space-y-4 flex-1 py-12">
             <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mb-4">
@@ -380,9 +348,13 @@ export default function NightPage() {
       {isHost && (
         <button 
           onClick={skipToResolution}
-          className="px-6 py-3 border border-border rounded-full text-text-tertiary hover:bg-muted active:scale-95 transition-all text-sm font-medium mt-4"
+          className={`px-8 py-4 rounded-full font-bold shadow-md transition-all mt-4 w-full max-w-xs ${
+            readyCount === totalPlayers 
+              ? 'bg-primary text-primary-foreground text-lg animate-pulse hover:scale-105 active:scale-95'
+              : 'border border-border text-text-tertiary hover:bg-muted active:scale-95 text-sm'
+          }`}
         >
-          모든 행동 스킵하고 결과로 넘어가기
+          {readyCount === totalPlayers ? '결과 확인으로 넘어가기' : '모든 행동 스킵하고 넘어가기'}
         </button>
       )}
     </div>
