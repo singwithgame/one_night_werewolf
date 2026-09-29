@@ -222,10 +222,15 @@ const calculateNightActions = async (roomId: string) => {
   const resolvedSnap = await get(resolvedRef);
   if (resolvedSnap.exists() && resolvedSnap.val() === true) return;
 
+
   const gameRef = ref(db, `rooms/${roomId}/game`);
   const gameSnap = await get(gameRef);
   if (!gameSnap.exists()) return;
   
+  const playersRef = ref(db, `rooms/${roomId}/players`);
+  const playersSnap = await get(playersRef);
+  const playersData = playersSnap.exists() ? playersSnap.val() : {};
+
   const data = gameSnap.val();
   const actions = data.nightActions || {};
   const currentRoles = { ...data.initialRoles };
@@ -238,7 +243,7 @@ const calculateNightActions = async (roomId: string) => {
     HUNTER: '사냥꾼', TANNER: '무두장이', VILLAGER: '마을주민', DOPPELGANGER: '도플갱어'
   };
 
-  const getNickname = (id: string) => data.players?.[id]?.nickname || '알 수 없음';
+  const getNickname = (id: string) => playersData[id]?.nickname || '알 수 없음';
 
   // 1. 도플갱어 처리
   Object.keys(actions).forEach(uid => {
@@ -337,8 +342,15 @@ const calculateNightActions = async (roomId: string) => {
         results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신은 혼자 남은 프리메이슨입니다.`;
       }
     }
+
     else if (r === 'INSOMNIAC') {
-      results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신의 최종 카드는 [${roleNameMap[currentRoles[uid]]}] 입니다.`;
+      let displayRole = currentRoles[uid];
+      // 도플갱어가 훔쳐지거나 교환되지 않은 채 불면증 환자 능력을 수행하는 경우, 원래 복사했던 직업을 보여줌
+      if (displayRole === 'DOPPELGANGER' && data.initialRoles[uid] === 'DOPPELGANGER') {
+        const doppelAct = actions[uid + '_doppelganger'];
+        if (doppelAct) displayRole = doppelAct.copiedRole;
+      }
+      results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신의 최종 카드는 [${roleNameMap[displayRole]}] 입니다.`;
     }
   });
 
