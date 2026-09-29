@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue } from 'firebase/database';
-import { db, getLocalUid } from '../lib/firebase';
+import { ref, onValue, update } from 'firebase/database';
+import { db } from '../lib/firebase';
 import { useGameStore } from '../store/gameStore';
 
 export default function EndPage() {
-  const { roomId } = useGameStore();
+  const { roomId, isHost } = useGameStore();
   const [votes, setVotes] = useState<Record<string, string>>({});
   const [players, setPlayers] = useState<Record<string, any>>({});
+  const [initialRoles, setInitialRoles] = useState<Record<string, string>>({});
   const [finalRoles, setFinalRoles] = useState<Record<string, string>>({});
+
+  const roleNameMap: Record<string, string> = {
+    WEREWOLF: '늑대인간', MINION: '하수인', MASON: '프리메이슨', SEER: '예언자',
+    ROBBER: '강도', TROUBLEMAKER: '말썽쟁이', DRUNK: '주정뱅이', INSOMNIAC: '불면증환자',
+    HUNTER: '사냥꾼', TANNER: '무두장이', VILLAGER: '마을주민', DOPPELGANGER: '도플갱어'
+  };
 
   useEffect(() => {
     if (!roomId) return;
@@ -17,21 +24,17 @@ export default function EndPage() {
       if (snap.exists()) {
         const data = snap.val();
         setVotes(data.votes || {});
+        setInitialRoles(data.initialRoles || {});
         setFinalRoles(data.currentRoles || {});
       }
     });
 
     const playersRef = ref(db, `rooms/${roomId}/players`);
     const unsubPlayers = onValue(playersRef, (snap) => {
-      if (snap.exists()) {
-        setPlayers(snap.val());
-      }
+      if (snap.exists()) setPlayers(snap.val());
     });
 
-    return () => {
-      unsub();
-      unsubPlayers();
-    };
+    return () => { unsub(); unsubPlayers(); };
   }, [roomId]);
 
   // 투표 결과 집계
@@ -41,14 +44,76 @@ export default function EndPage() {
   });
 
   const maxVotes = Math.max(...Object.values(voteCounts), 0);
-  const deadPlayers = Object.keys(voteCounts).filter(uid => voteCounts[uid] === maxVotes && maxVotes > 1);
-  // maxVotes가 1이면 평화촌(아무도 안 죽음) 조건 처리 등이 필요하나 여기선 간략화
+  // maxVotes가 1이면 무효표(평화)
+  const deadPlayers = maxVotes > 1 ? Object.keys(voteCounts).filter(uid => voteCounts[uid] === maxVotes) : [];
+
+  // 승패 판정 로직
+  let winningTeam = '';
+  let winReason = '';
+  
+  const deadRoles = deadPlayers.map(uid => finalRoles[uid]);
+  const isTannerDead = deadRoles.includes('TANNER');
+  const isWolfDead = deadRoles.includes('WEREWOLF');
+  
+  const wolvesInTown = Object.keys(players).filter(uid => finalRoles[uid] === 'WEREWOLF');
+  const minionsInTown = Object.keys(players).filter(uid => finalRoles[uid] === 'MINION');
+
+  if (isTannerDead) {
+    winningTeam = '무두장이';
+    winReason = '무두장이가 처형당했습니다!';
+  } else if (isWolfDead) {
+    winningTeam = '마을';
+    winReason = '늑대인간이 처형당했습니다!';
+  } else {
+    // 늑대가 안죽음
+    if (wolvesInTown.length > 0) {
+      winningTeam = '늑대인간';
+      winReason = '늑대인간이 아무도 처형되지 않았습니다!';
+    } else {
+      // 마을에 늑대가 없음
+      if (minionsInTown.length > 0) {
+        if (deadRoles.includes('MINION')) {
+          winningTeam = '마을';
+          winReason = '늑대인간이 없어서 하수인을 처형했습니다!';
+        } else {
+          winningTeam = '하수인';
+          winReason = '늑대인간이 없는데 하수인이 살아남았습니다!';
+        }
+      } else {
+        // 늑대도 없고 하수인도 없음
+        if (deadPlayers.length === 0) {
+          winningTeam = '마을';
+          winReason = '마을에 늑대가 없어 아무도 처형하지 않았습니다! (평화 마을)';
+        } else {
+          winningTeam = '아무도 승리하지 못함';
+          winReason = '마을에 늑대가 없는데 애먼 주민을 처형했습니다!';
+        }
+      }
+    }
+  }
+
+  const handleReturnToLobby = async () => {
+    if (!roomId || !isHost) return;
+    
+    // 상태 초기화
+    const updates: any = {};
+    Object.keys(players).forEach(uid => {
+      updates[`rooms/${roomId}/players/${uid}/ready`] = false;
+    });
+    updates[`rooms/${roomId}/game`] = null; // 게임 데이터 삭제
+    updates[`rooms/${roomId}/info/phase`] = 'SETUP';
+    
+    await update(ref(db), updates);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500 w-full text-center">
-      <div className="space-y-2">
+    <div className="flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-500 w-full text-center">
+      <div className="space-y-1 mt-4">
         <h1 className="font-display text-4xl font-bold text-primary tracking-tight">Game Over</h1>
-        <p className="text-base text-text-secondary">투표 결과 및 최종 직업을 확인하세요.</p>
+        <div className="bg-surface-dark-elevated border border-border p-6 rounded-xl mt-4 shadow-lg w-full">
+          <p className="text-xl font-bold text-foreground mb-1">{winningTeam} 승리!</p>
+          <p className="text-sm text-text-secondary">{winReason}</p>
+        </div>
       </div>
 
       <div className="w-full bg-surface-card border border-border rounded-xl p-6 shadow-sm space-y-6">
@@ -57,8 +122,8 @@ export default function EndPage() {
           {deadPlayers.length > 0 ? (
             <div className="flex flex-wrap gap-2 justify-center">
               {deadPlayers.map(uid => (
-                <div key={uid} className="bg-destructive/10 text-destructive px-4 py-2 rounded-lg font-medium">
-                  {players[uid]?.nickname} ({finalRoles[uid]})
+                <div key={uid} className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-2 rounded-lg font-bold shadow-sm">
+                  {players[uid]?.nickname}
                 </div>
               ))}
             </div>
@@ -68,24 +133,44 @@ export default function EndPage() {
         </div>
 
         <div className="border-t border-border pt-6">
-          <h3 className="font-medium text-text-primary mb-3">최종 직업 공개</h3>
+          <h3 className="font-medium text-text-primary mb-3">최종 직업 결과</h3>
           <ul className="space-y-2">
-            {Object.keys(players).map(uid => (
-              <li key={uid} className="flex justify-between p-3 rounded-lg bg-input-background border border-border">
-                <span className="font-medium text-foreground">{players[uid]?.nickname}</span>
-                <span className="text-primary font-bold">{finalRoles[uid]}</span>
-              </li>
-            ))}
+            {Object.keys(players).map(uid => {
+              const initRole = initialRoles[uid];
+              const finalRole = finalRoles[uid];
+              const changed = initRole !== finalRole;
+              
+              return (
+                <li key={uid} className="flex justify-between items-center p-3 rounded-lg bg-input-background border border-border">
+                  <span className="font-medium text-foreground">{players[uid]?.nickname}</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    {changed ? (
+                      <>
+                        <span className="text-text-tertiary line-through">{roleNameMap[initRole]}</span>
+                        <span className="text-text-tertiary">➔</span>
+                        <span className="text-primary font-bold">{roleNameMap[finalRole]}</span>
+                      </>
+                    ) : (
+                      <span className="text-primary font-bold">{roleNameMap[finalRole]}</span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
 
-      <button 
-        onClick={() => window.location.reload()}
-        className="w-full px-6 py-4 bg-primary text-primary-foreground rounded-full font-medium tracking-wide hover:opacity-90 transition-opacity"
-      >
-        처음으로 돌아가기
-      </button>
+      {isHost ? (
+        <button 
+          onClick={handleReturnToLobby}
+          className="w-full px-6 py-4 bg-primary text-primary-foreground rounded-full font-bold tracking-wide hover:opacity-90 transition-opacity shadow-md"
+        >
+          대기실로 돌아가기 (다시하기)
+        </button>
+      ) : (
+        <p className="text-text-tertiary text-sm">방장이 재시작하기를 기다리는 중...</p>
+      )}
     </div>
   );
 }

@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+const fs = require('fs');
+let content = fs.readFileSync('src/pages/VotingPage.tsx', 'utf-8');
+
+content = `import { useState, useEffect } from 'react';
 import { ref, onValue, update } from 'firebase/database';
 import { db, getLocalUid } from '../lib/firebase';
 import { useGameStore } from '../store/gameStore';
@@ -13,7 +16,7 @@ export default function VotingPage() {
 
   useEffect(() => {
     if (!roomId) return;
-    const playersRef = ref(db, `rooms/${roomId}/players`);
+    const playersRef = ref(db, \`rooms/\${roomId}/players\`);
     const unsubscribePlayers = onValue(playersRef, (snap) => {
       if (snap.exists()) {
         const data = snap.val();
@@ -21,7 +24,7 @@ export default function VotingPage() {
       }
     });
 
-    const votesRef = ref(db, `rooms/${roomId}/game/votes`);
+    const votesRef = ref(db, \`rooms/\${roomId}/game/votes\`);
     const unsubscribeVotes = onValue(votesRef, (snap) => {
       if (snap.exists()) setVotes(snap.val());
       else setVotes({});
@@ -32,12 +35,12 @@ export default function VotingPage() {
 
   const handleVote = async (targetId: string) => {
     if (!roomId) return;
-    await update(ref(db, `rooms/${roomId}/game/votes`), { [uid]: targetId });
+    await update(ref(db, \`rooms/\${roomId}/game/votes\`), { [uid]: targetId });
   };
 
   const handleEndGame = async () => {
     if (!roomId || !isHost) return;
-    await update(ref(db, `rooms/${roomId}/info`), { phase: 'END' });
+    await update(ref(db, \`rooms/\${roomId}/info\`), { phase: 'END' });
   };
 
   const votedCount = Object.keys(votes).length;
@@ -48,22 +51,22 @@ export default function VotingPage() {
       <div className="space-y-2">
         <h1 className="font-display text-4xl font-bold text-destructive tracking-tight">Voting</h1>
         <p className="text-base text-text-secondary">누구를 처형할지 지목하세요. (언제든 변경 가능)</p>
-        <p className="text-sm font-medium bg-input-background px-4 py-1 rounded-full border border-border inline-block mt-2">
+        <p className="text-sm font-medium bg-input-background px-4 py-1 rounded-full border border-border inline-block">
           투표 현황: {votedCount} / {players.length}
         </p>
       </div>
 
       <div className="w-full max-w-sm relative">
-        <div className="bg-surface-card border border-border rounded-xl p-4 shadow-sm h-72 overflow-y-auto space-y-3 snap-y snap-mandatory scrollbar-hide py-8">
+        <div className="bg-surface-card border border-border rounded-xl p-4 shadow-sm h-64 overflow-y-auto space-y-2 snap-y snap-mandatory scrollbar-hide">
           {players.map(p => (
             <button
               key={p.uid}
               onClick={() => handleVote(p.uid)}
-              className={`w-full p-4 rounded-xl font-bold transition-all snap-center flex items-center justify-center ${
+              className={\`w-full p-4 rounded-xl font-medium transition-all snap-center flex items-center justify-center \${
                 myVote === p.uid 
-                ? 'bg-destructive text-destructive-foreground scale-[1.02] shadow-md border-transparent'
+                ? 'bg-destructive text-destructive-foreground scale-105 shadow-md border-transparent'
                 : 'bg-input-background border-border text-foreground hover:bg-muted'
-              }`}
+              }\`}
             >
               {p.nickname} {p.uid === uid && '(나)'}
             </button>
@@ -77,7 +80,7 @@ export default function VotingPage() {
         {myVote ? (
           <p className="text-primary font-bold animate-pulse">투표가 반영되었습니다. 방장의 집행을 기다리세요.</p>
         ) : (
-          <p className="text-text-tertiary">스크롤하여 투표 대상을 선택하세요.</p>
+          <p className="text-text-tertiary">아직 투표하지 않았습니다.</p>
         )}
       </div>
 
@@ -85,11 +88,11 @@ export default function VotingPage() {
         <div className="w-full pt-4 border-t border-border mt-4">
           <button 
             onClick={handleEndGame}
-            className={`w-full px-6 py-4 rounded-full font-bold tracking-wide transition-all shadow-md ${
+            className={\`w-full px-6 py-4 rounded-full font-bold tracking-wide transition-all shadow-md \${
               allVoted 
-                ? 'bg-destructive text-destructive-foreground text-lg animate-pulse hover:scale-105 active:scale-95' 
-                : 'border border-border text-text-tertiary hover:bg-muted active:scale-95 text-sm'
-            }`}
+                ? 'bg-destructive text-destructive-foreground animate-pulse hover:scale-105 active:scale-95' 
+                : 'border border-border text-text-tertiary hover:bg-muted active:scale-95'
+            }\`}
           >
             {allVoted ? '투표 집행 (결과 보기)' : '모두 스킵하고 집행'}
           </button>
@@ -98,3 +101,6 @@ export default function VotingPage() {
     </div>
   );
 }
+\`;
+
+fs.writeFileSync('src/pages/VotingPage.tsx', content);

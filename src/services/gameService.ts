@@ -26,8 +26,7 @@ const shuffle = <T,>(array: T[]): T[] => {
 };
 
 // 게임 시작 및 역할 분배
-export const startGame = async (roomId: string, players: any[]) => {
-  const deck = getDefaultDeck(players.length);
+export const startGame = async (roomId: string, players: any[], deck: Role[]) => {
   const shuffledDeck = shuffle(deck);
 
   const initialRoles: Record<string, Role> = {};

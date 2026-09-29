@@ -9,7 +9,15 @@ export default function NightResultPage() {
 
   const [hasChecked, setHasChecked] = useState(false);
   const [resultMessage, setResultMessage] = useState<string>('계산 중입니다...');
-  
+  const [mathProblem, setMathProblem] = useState({ x: 0, y: 0 });
+  const [mathAnswer, setMathAnswer] = useState('');
+
+  useEffect(() => {
+    setMathProblem({
+      x: Math.floor(Math.random() * 90) + 10,
+      y: Math.floor(Math.random() * 90) + 10
+    });
+  }, []);
   useEffect(() => {
     if (!roomId) return;
 
@@ -24,12 +32,21 @@ export default function NightResultPage() {
       if (snap.exists()) {
         setResultMessage(snap.val());
       } else {
-        setResultMessage('아무런 행동을 하지 않았거나 능력을 사용하지 않았습니다.');
+        setResultMessage('NONE');
       }
     });
 
     return () => unsubResult();
   }, [roomId, isHost, uid]);
+
+  const handleMathSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (parseInt(mathAnswer) === mathProblem.x + mathProblem.y) {
+      handleCheckDone();
+    } else {
+      alert('틀렸습니다!');
+    }
+  };
 
   const handleCheckDone = async () => {
     setHasChecked(true);
@@ -37,23 +54,29 @@ export default function NightResultPage() {
     await update(ref(db, `rooms/${roomId}/game/resultReady`), { [uid]: true });
   };
 
+  const [readyCount, setReadyCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+
   useEffect(() => {
-    // 모든 플레이어가 확인했는지 체크하여 DAY로 넘어감
+    // 플레이어들이 모두 확인했는지 카운트만 계산
     if (!roomId || !isHost) return;
     const readyRef = ref(db, `rooms/${roomId}/game/resultReady`);
     const playersRef = ref(db, `rooms/${roomId}/players`);
     
     let total = 0;
     const unsubPlayers = onValue(playersRef, (snap) => {
-      if (snap.exists()) total = Object.keys(snap.val()).length;
+      if (snap.exists()) {
+        total = Object.keys(snap.val()).length;
+        setTotalCount(total);
+      }
     });
 
     const unsubReady = onValue(readyRef, (snap) => {
       if (snap.exists() && total > 0) {
         const data = snap.val();
-        if (Object.keys(data).length >= total) {
-          update(ref(db, `rooms/${roomId}/info`), { phase: 'DAY', dayStartTime: Date.now() });
-        }
+        setReadyCount(Object.keys(data).length);
+      } else {
+        setReadyCount(0);
       }
     });
     
@@ -68,18 +91,58 @@ export default function NightResultPage() {
       </div>
 
       <div className="w-full bg-surface-card border border-border rounded-xl p-8 shadow-sm">
-        <p className="text-lg font-medium text-foreground whitespace-pre-wrap">{resultMessage}</p>
+        {resultMessage === 'NONE' ? (
+          <div className="space-y-4">
+            <p className="text-lg font-medium text-foreground">간밤에 푹 잤습니다. 아침을 기다리며 몸을 푸세요.</p>
+            {!hasChecked ? (
+              <form onSubmit={handleMathSubmit} className="flex gap-2">
+                <div className="flex-1 bg-input-background text-foreground text-xl font-display flex items-center justify-center rounded-md border border-border">
+                  {mathProblem.x} + {mathProblem.y} =
+                </div>
+                <input 
+                  type="number"
+                  value={mathAnswer}
+                  onChange={(e) => setMathAnswer(e.target.value)}
+                  className="w-24 bg-input-background text-foreground text-center text-xl border border-border rounded-md px-2 py-3 focus:outline-none focus:ring-1 focus:ring-ring"
+                  required
+                />
+                <button type="submit" className="bg-primary text-primary-foreground px-4 rounded-md font-medium">
+                  완료
+                </button>
+              </form>
+            ) : (
+              <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중...</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-lg font-medium text-foreground whitespace-pre-wrap">{resultMessage}</p>
+        )}
       </div>
 
-      {!hasChecked ? (
+      {resultMessage !== 'NONE' && (
+        !hasChecked ? (
+          <button 
+            onClick={handleCheckDone}
+            className="w-full px-6 py-4 bg-primary text-primary-foreground rounded-full font-medium tracking-wide hover:opacity-90 transition-opacity"
+          >
+            확인 완료
+          </button>
+        ) : (
+          <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중...</p>
+        )
+      )}
+
+      {isHost && (
         <button 
-          onClick={handleCheckDone}
-          className="w-full px-6 py-4 bg-primary text-primary-foreground rounded-full font-medium tracking-wide hover:opacity-90 transition-opacity"
+          onClick={() => update(ref(db, `rooms/${roomId}/info`), { phase: 'DAY', dayStartTime: Date.now() })}
+          className={`px-8 py-4 rounded-full font-bold shadow-md transition-all mt-4 w-full max-w-xs mx-auto block ${
+            readyCount === totalCount && totalCount > 0
+              ? 'bg-success text-success-foreground text-lg animate-pulse hover:scale-105 active:scale-95'
+              : 'border border-border text-text-tertiary hover:bg-muted active:scale-95 text-sm'
+          }`}
         >
-          확인 완료
+          {readyCount === totalCount && totalCount > 0 ? '아침으로 넘어가기' : '모두 스킵하고 아침으로'}
         </button>
-      ) : (
-        <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중...</p>
       )}
     </div>
   );
@@ -182,7 +245,27 @@ const calculateNightActions = async (roomId: string) => {
       if (wolves.length > 0) {
         results[uid] = (results[uid] ? results[uid] + '\n' : '') + `다른 늑대인간: ${wolves.map(getNickname).join(', ')}`;
       } else {
-        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신은 유일한 늑대인간입니다. (원한다면 룰에 따라 중앙 카드 1장을 볼 수 있습니다)`;
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신은 유일한 늑대인간입니다.`;
+        const act = actions[uid];
+        if (act && act.type === 'LONE_WOLF' && act.centerIndex !== null) {
+          results[uid] += `\n확인한 중앙 ${act.centerIndex + 1}번 카드: [${roleNameMap[data.centerRoles[act.centerIndex]]}]`;
+        }
+      }
+    }
+    else if (r === 'MINION') {
+      const wolves = Object.keys(data.initialRoles).filter(k => data.initialRoles[k] === 'WEREWOLF');
+      if (wolves.length > 0) {
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신이 돕고 있는 늑대인간: ${wolves.map(getNickname).join(', ')}`;
+      } else {
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `마을에 늑대인간이 없습니다! 안심하세요.`;
+      }
+    }
+    else if (r === 'MASON') {
+      const masons = Object.keys(data.initialRoles).filter(k => data.initialRoles[k] === 'MASON' && k !== uid);
+      if (masons.length > 0) {
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `다른 프리메이슨: ${masons.map(getNickname).join(', ')}`;
+      } else {
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신은 혼자 남은 프리메이슨입니다.`;
       }
     }
     else if (r === 'INSOMNIAC') {
