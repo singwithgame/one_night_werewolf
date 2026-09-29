@@ -85,7 +85,14 @@ export default function LobbyPage() {
 
   if (mode === 'HISTORY') {
     return (
-      <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
+          setPhase('HISTORY');
+        } else {
+          setError('비밀번호가 일치하지 않습니다.');
+        }
+      }} className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
         <div className="text-center">
           <h2 className="font-display text-2xl font-bold text-primary">기록 조회</h2>
           <p className="text-sm text-text-secondary mt-1">과거 게임 기록을 열람하기 위한 관리자 비밀번호를 입력하세요.</p>
@@ -112,25 +119,22 @@ export default function LobbyPage() {
             뒤로가기
           </button>
           <button 
-            onClick={() => {
-              if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
-                setPhase('HISTORY');
-              } else {
-                setError('비밀번호가 일치하지 않습니다.');
-              }
-            }}
+            type="submit"
             className="flex-[2] bg-primary text-primary-foreground py-4 rounded-xl font-bold hover:opacity-90 active:scale-[0.98] transition-all flex justify-center shadow-md"
           >
             기록 열람하기
           </button>
         </div>
-      </div>
+      </form>
     );
   }
 
   if (mode === 'HOST') {
     return (
-      <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        handleCreateRoom();
+      }} className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
         <div className="text-center">
           <h2 className="font-display text-2xl font-bold text-primary">방 만들기</h2>
           <p className="text-sm text-text-secondary mt-1">게임 설정을 선택하고 이름을 입력하세요.</p>
@@ -189,19 +193,22 @@ export default function LobbyPage() {
             뒤로가기
           </button>
           <button 
+            type="submit"
             disabled={!nickname.trim() || !password.trim() || loading}
-            onClick={handleCreateRoom}
             className="flex-[2] bg-primary text-primary-foreground py-4 rounded-xl font-bold disabled:opacity-50 hover:opacity-90 active:scale-[0.98] transition-all flex justify-center shadow-md"
           >
             {loading ? '생성 중...' : '방 생성하기'}
           </button>
         </div>
-      </div>
+      </form>
     );
   }
 
   return (
-    <div className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      handleJoinRoom();
+    }} className="flex flex-col space-y-8 w-full px-4 animate-in slide-in-from-right-4 duration-300">
       <div className="text-center">
         <h2 className="font-display text-2xl font-bold text-primary">방 참여하기</h2>
         <p className="text-sm text-text-secondary mt-1">초대받은 6자리 코드와 이름을 입력하세요.</p>
@@ -241,13 +248,13 @@ export default function LobbyPage() {
           뒤로가기
         </button>
         <button 
+          type="submit"
           disabled={!nickname.trim() || !roomCodeInput.trim() || loading}
-          onClick={handleJoinRoom}
           className="flex-[2] bg-primary text-primary-foreground py-4 rounded-xl font-bold disabled:opacity-50 hover:opacity-90 active:scale-[0.98] transition-all flex justify-center shadow-md"
         >
           {loading ? '입장 중...' : '입장하기'}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
