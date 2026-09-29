@@ -35,6 +35,20 @@ export default function NightPage() {
 
   useEffect(() => {
     if (!roomId) return;
+    const phaseRef = ref(db, `rooms/${roomId}/info/phase`);
+    const unsubscribe = onValue(phaseRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const newPhase = snapshot.val();
+        if (newPhase !== 'NIGHT' && newPhase !== 'SETUP') {
+          setPhase(newPhase);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [roomId, setPhase]);
+
+  useEffect(() => {
+    if (!roomId) return;
     
     // 전체 초기 역할 가져오기 (도플갱어 등을 위해)
     // 주의: 실제 서비스에서는 보안상 자기 것만 가져오거나 서버리스 함수로 가려야 하지만, 현재는 로컬 클라이언트 로직으로 처리

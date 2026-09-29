@@ -113,7 +113,7 @@ export default function LobbyPage() {
 
         <div className="pt-4 flex gap-3">
           <button 
-            onClick={() => setMode('SELECT')}
+            type="button" onClick={() => setMode('SELECT')}
             className="flex-1 border-2 border-border py-4 rounded-xl font-medium hover:bg-muted active:scale-95 transition-all"
           >
             뒤로가기
@@ -187,7 +187,7 @@ export default function LobbyPage() {
 
         <div className="pt-4 flex gap-3">
           <button 
-            onClick={() => setMode('SELECT')}
+            type="button" onClick={() => setMode('SELECT')}
             className="flex-1 border-2 border-border py-4 rounded-xl font-medium hover:bg-muted active:scale-95 transition-all"
           >
             뒤로가기
@@ -242,7 +242,7 @@ export default function LobbyPage() {
 
       <div className="pt-4 flex gap-3">
         <button 
-          onClick={() => setMode('SELECT')}
+          type="button" onClick={() => setMode('SELECT')}
           className="flex-1 border-2 border-border py-4 rounded-xl font-medium hover:bg-muted active:scale-95 transition-all"
         >
           뒤로가기
