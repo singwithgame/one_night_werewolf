@@ -120,10 +120,37 @@ const calculateNightActions = async (roomId: string) => {
     }
   });
 
-  // 2. 강도(Robber) & 말썽쟁이(Troublemaker) & 주정뱅이(Drunk) 순서대로 교환 처리
+  // 2. 능력 해결 순서 정렬 (보드게임 룰 반영)
+  // 원래 보드게임 룰의 야간 행동 순서:
+  // 예언자 -> 강도 -> 말썽쟁이 -> 주정뱅이
+  // 도플갱어가 복사한 능력은 원본 직업보다 먼저 실행됨
+  const orderedActions: { uid: string; act: any; priority: number }[] = [];
   Object.keys(actions).forEach(uid => {
+    if (uid.includes('_doppelganger')) return;
     const act = actions[uid];
-    if (act.type === 'ROBBER') {
+    let priority = 99;
+    
+    if (act.type === 'SEER') priority = data.initialRoles[uid] === 'DOPPELGANGER' ? 1 : 2;
+    else if (act.type === 'ROBBER') priority = data.initialRoles[uid] === 'DOPPELGANGER' ? 3 : 4;
+    else if (act.type === 'TROUBLEMAKER') priority = data.initialRoles[uid] === 'DOPPELGANGER' ? 5 : 6;
+    else if (act.type === 'DRUNK') priority = data.initialRoles[uid] === 'DOPPELGANGER' ? 7 : 8;
+    
+    orderedActions.push({ uid, act, priority });
+  });
+
+  orderedActions.sort((a, b) => a.priority - b.priority);
+
+  // 3. 순서대로 교환 처리
+  orderedActions.forEach(({ uid, act }) => {
+    if (act.type === 'SEER') {
+      // 예언자는 교환을 하지 않으며, 초기 상태(data.initialRoles, data.centerRoles)를 기준으로 봅니다.
+      if (act.targets && act.targets.length > 0) {
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `${getNickname(act.targets[0])}님의 카드는 [${roleNameMap[data.initialRoles[act.targets[0]]]}] 입니다.`;
+      } else if (act.centers && act.centers.length === 2) {
+        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `중앙 ${act.centers[0] + 1}번은 [${roleNameMap[data.centerRoles[act.centers[0]]]}], ${act.centers[1] + 1}번은 [${roleNameMap[data.centerRoles[act.centers[1]]]}] 입니다.`;
+      }
+    }
+    else if (act.type === 'ROBBER') {
       const target = act.target;
       const stolenRole = currentRoles[target];
       currentRoles[target] = currentRoles[uid];
@@ -144,13 +171,6 @@ const calculateNightActions = async (roomId: string) => {
       currentRoles[uid] = centerRoles[idx];
       centerRoles[idx] = temp;
       results[uid] = (results[uid] ? results[uid] + '\n' : '') + `중앙 ${idx + 1}번 카드와 카드를 교환했습니다.`;
-    }
-    else if (act.type === 'SEER') {
-      if (act.targets && act.targets.length > 0) {
-        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `${getNickname(act.targets[0])}님의 카드는 [${roleNameMap[data.initialRoles[act.targets[0]]]}] 입니다.`;
-      } else if (act.centers && act.centers.length === 2) {
-        results[uid] = (results[uid] ? results[uid] + '\n' : '') + `중앙 ${act.centers[0] + 1}번은 [${roleNameMap[data.centerRoles[act.centers[0]]]}], ${act.centers[1] + 1}번은 [${roleNameMap[data.centerRoles[act.centers[1]]]}] 입니다.`;
-      }
     }
   });
 
