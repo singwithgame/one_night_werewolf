@@ -5,7 +5,7 @@ import { useGameStore } from '../store/gameStore';
 import type { Role } from '../services/gameService';
 
 export default function NightPage() {
-  const { roomId, isHost } = useGameStore();
+  const { roomId, isHost, setPhase } = useGameStore();
   const uid = getLocalUid();
   
   const [initialRoles, setInitialRoles] = useState<Record<string, Role>>({});
