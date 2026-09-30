@@ -11,6 +11,7 @@ export default function NightResultPage() {
   const [hasChecked, setHasChecked] = useState(false);
   const [resultMessage, setResultMessage] = useState<string>('계산 중입니다...');
   const [centerRoles, setCenterRoles] = useState<string[]>([]);
+  const [initialCenterRoles, setInitialCenterRoles] = useState<string[]>([]);
   const [revealedCenter, setRevealedCenter] = useState<number | null>(null);
   const [mathProblem, setMathProblem] = useState({ x: 0, y: 0 });
   const [mathAnswer, setMathAnswer] = useState('');
@@ -143,7 +144,7 @@ export default function NightResultPage() {
                           WEREWOLF: '늑대인간', MINION: '하수인', MASON: '프리메이슨', SEER: '예언자',
                           ROBBER: '강도', TROUBLEMAKER: '말썽쟁이', DRUNK: '주정뱅이', INSOMNIAC: '불면증환자',
                           HUNTER: '사냥꾼', TANNER: '무두장이', VILLAGER: '마을주민', DOPPELGANGER: '도플갱어'
-                        }[centerRoles[idx]] || '알 수 없음'
+                        }[initialCenterRoles[idx]] || '알 수 없음'
                       }
                     </span>
                   ) : (
@@ -214,7 +215,11 @@ export default function NightResultPage() {
 }
 
 // 간단한 서버리스 역할 액션 계산 시뮬레이터 (호스트가 한 번만 실행)
+let isCalculating = false;
 const calculateNightActions = async (roomId: string) => {
+  if (isCalculating) return;
+  isCalculating = true;
+  try {
   const { get } = await import('firebase/database');
   
   // 이미 계산했는지 확인
@@ -235,6 +240,7 @@ const calculateNightActions = async (roomId: string) => {
   const actions = data.nightActions || {};
   const currentRoles = { ...data.initialRoles };
   const centerRoles = [...data.centerRoles];
+  const initialCenterRoles = [...data.centerRoles];
   const results: Record<string, string> = {};
 
   const roleNameMap: Record<string, string> = {
@@ -250,6 +256,7 @@ const calculateNightActions = async (roomId: string) => {
     if (uid.includes('_doppelganger')) {
       const act = actions[uid];
       results[uid.replace('_doppelganger', '')] = `${getNickname(act.target)}님의 직업([${roleNameMap[act.copiedRole]}])을 복사했습니다.`;
+      currentRoles[uid.replace('_doppelganger', '')] = act.copiedRole;
     }
   });
 
@@ -358,7 +365,11 @@ const calculateNightActions = async (roomId: string) => {
   const updates: any = {};
   updates[`rooms/${roomId}/game/currentRoles`] = currentRoles;
   updates[`rooms/${roomId}/game/centerRoles`] = centerRoles;
+  updates[`rooms/${roomId}/game/initialCenterRoles`] = initialCenterRoles;
   updates[`rooms/${roomId}/game/nightResults`] = results;
   updates[`rooms/${roomId}/game/resolved`] = true;
   await update(ref(db), updates);
+  } finally {
+    isCalculating = false;
+  }
 };

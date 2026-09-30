@@ -26,7 +26,7 @@ export const createRoom = async (hostUid: string, nickname: string, timeLimit: n
     info: {
       hostUid,
       timeLimit,
-      phase: 'LOBBY',
+      phase: 'SETUP',
       createdAt: Date.now(),
     },
     players: {
@@ -51,7 +51,7 @@ export const joinRoom = async (roomCode: string, uid: string, nickname: string):
   }
 
   const roomData = snapshot.val();
-  if (roomData.info.phase !== 'LOBBY') {
+  if (roomData.info.phase !== 'SETUP') {
     throw new Error('이미 게임이 시작된 방입니다.');
   }
 

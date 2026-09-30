@@ -41,6 +41,7 @@ export const startGame = async (roomId: string, players: any[], deck: Role[]) =>
   updates[`rooms/${roomId}/game/initialRoles`] = initialRoles; // 초기 역할 (불변)
   updates[`rooms/${roomId}/game/currentRoles`] = initialRoles; // 현재 역할 (교환/약탈 등에 의해 변경됨)
   updates[`rooms/${roomId}/game/centerRoles`] = centerRoles;
+  updates[`rooms/${roomId}/game/initialCenterRoles`] = centerRoles;
   
   // 밤 페이즈 상태 초기화
   updates[`rooms/${roomId}/game/nightActions`] = {};

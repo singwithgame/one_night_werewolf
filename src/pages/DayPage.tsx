@@ -7,6 +7,8 @@ export default function DayPage() {
   const { roomId, isHost, setPhase } = useGameStore();
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [timeLimit, setTimeLimit] = useState<number>(300);
+  const [endTime, setEndTime] = useState<number | null>(null);
+  const [currentPhase, setCurrentPhase] = useState<string>('DAY');
   const [deck, setDeck] = useState<string[]>([]);
   const roleNameMap: Record<string, string> = {
     WEREWOLF: '늑대인간', MINION: '하수인', MASON: '프리메이슨', SEER: '예언자',
@@ -20,17 +22,10 @@ export default function DayPage() {
     const unsubPhase = onValue(phaseRef, (snap) => {
       if (snap.exists()) {
         const newPhase = snap.val();
-        
         if (newPhase !== 'DAY') setPhase(newPhase);
-
       }
     });
-    return () => unsubPhase();
-  }, [roomId, setPhase]);
 
-  useEffect(() => {
-    if (!roomId) return;
-    
     const deckRef = ref(db, `rooms/${roomId}/settings/deck`);
     const unsubDeck = onValue(deckRef, snap => {
       if(snap.exists()) setDeck(snap.val());
@@ -42,32 +37,37 @@ export default function DayPage() {
       if (snap.exists()) {
         const data = snap.val();
         setTimeLimit(data.timeLimit || 300);
+        setCurrentPhase(data.phase || 'DAY');
         
         // 낮이 시작된 시간
         if (data.dayStartTime) {
           const limitMs = (data.timeLimit || 300) * 1000;
-          const endTime = data.dayStartTime + limitMs;
-          
-          const updateTimer = () => {
-            const now = Date.now();
-            const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
-            setTimeLeft(remaining);
-            
-            // 시간이 0이 되면 자동으로 투표 페이즈로 이동 (방장만 트리거)
-            if (remaining <= 0 && isHost && data.phase === 'DAY') {
-              update(ref(db, `rooms/${roomId}/info`), { phase: 'VOTING' });
-            }
-          };
-          
-          updateTimer(); // 즉시 1회 실행
-          const interval = setInterval(updateTimer, 1000);
-          return () => clearInterval(interval);
+          setEndTime(data.dayStartTime + limitMs);
         }
       }
     });
 
-    return () => { unsubscribe(); unsubDeck(); };
-  }, [roomId, isHost]);
+    return () => { unsubscribe(); unsubDeck(); unsubPhase(); };
+  }, [roomId, setPhase]);
+
+  useEffect(() => {
+    if (!endTime) return;
+    
+    const updateTimer = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+      setTimeLeft(remaining);
+      
+      // 시간이 0이 되면 자동으로 투표 페이즈로 이동 (방장만 트리거)
+      if (remaining <= 0 && isHost && currentPhase === 'DAY') {
+        update(ref(db, `rooms/${roomId}/info`), { phase: 'VOTING' });
+      }
+    };
+    
+    updateTimer(); // 즉시 1회 실행
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [endTime, isHost, currentPhase, roomId]);
 
   const handleSkipToVoting = async () => {
     if (!roomId || !isHost) return;
