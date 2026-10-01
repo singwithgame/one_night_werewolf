@@ -157,7 +157,7 @@ export default function HistoryPage() {
               {isExpanded && (
                 <div className="p-4 space-y-6 animate-in slide-in-from-top-2 duration-300">
                   <div className="bg-input-background p-3 rounded-lg border border-border">
-                    <p className="text-sm font-bold text-foreground">이유:</p>
+                    
                     <p className="text-sm text-text-secondary">{winReason}</p>
                   </div>
 

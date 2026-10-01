@@ -96,7 +96,7 @@ export default function SetupPage() {
   };
 
   const handleRoleCountChange = async (roleId: Role, delta: number) => {
-    if (!isHost || !roomId) return;
+    if (!isHost || !roomId || roleId === 'WEREWOLF') return;
     const count = deck.filter(r => r === roleId).length;
     const roleDef = AVAILABLE_ROLES.find(r => r.id === roleId);
     if (!roleDef) return;
@@ -124,13 +124,14 @@ export default function SetupPage() {
   const setRandomDeck = async () => {
     if (!isHost || !roomId) return;
     const newDeck: Role[] = [];
-    const base: Role[] = ['WEREWOLF', 'SEER', 'ROBBER', 'TROUBLEMAKER'];
+    const base: Role[] = ['WEREWOLF', 'WEREWOLF', 'SEER', 'ROBBER', 'TROUBLEMAKER'];
     base.forEach(r => newDeck.push(r));
     
     let attempts = 0;
     while (newDeck.length < requiredCards && attempts < 100) {
       attempts++;
       const randomRole = AVAILABLE_ROLES[Math.floor(Math.random() * AVAILABLE_ROLES.length)];
+      if (randomRole.id === 'WEREWOLF') continue; // 늑대인간은 고정
       const currentCount = newDeck.filter(r => r === randomRole.id).length;
       if (randomRole.id === 'MASON') {
         if (currentCount === 0 && newDeck.length + 2 <= requiredCards) {

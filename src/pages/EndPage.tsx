@@ -122,9 +122,9 @@ export default function EndPage() {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-500 w-full text-center">
-      <div className="space-y-1 mt-4 w-full">
+      <div className="flex flex-col gap-6 mt-4 w-full">
         <h1 className="font-display text-4xl font-bold text-primary tracking-tight">Game Over</h1>
-        <div className="bg-surface-dark-elevated border border-border p-6 rounded-xl mt-8 shadow-lg w-full">
+        <div className="bg-surface-dark-elevated border border-border p-6 rounded-xl shadow-lg w-full">
           <p className="text-xl font-bold text-foreground mb-1">{winningTeam} 승리!</p>
           <p className="text-sm text-text-secondary">{winReason}</p>
         </div>
