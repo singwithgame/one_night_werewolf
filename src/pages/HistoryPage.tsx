@@ -9,6 +9,18 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const roleNameMap: Record<string, string> = {
+    WEREWOLF: '늑대인간', MINION: '하수인', MASON: '프리메이슨', SEER: '예언자',
+    ROBBER: '강도', TROUBLEMAKER: '말썽쟁이', DRUNK: '주정뱅이', INSOMNIAC: '불면증환자',
+    HUNTER: '사냥꾼', TANNER: '무두장이', VILLAGER: '마을주민', DOPPELGANGER: '도플갱어'
+  };
+
+  const rolePriority: Record<string, number> = {
+    DOPPELGANGER: 1, WEREWOLF: 2, MINION: 3, MASON: 4, SEER: 5,
+    ROBBER: 6, TROUBLEMAKER: 7, DRUNK: 8, INSOMNIAC: 9, HUNTER: 10,
+    TANNER: 11, VILLAGER: 12
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
@@ -53,49 +65,97 @@ export default function HistoryPage() {
         <p className="text-text-tertiary mt-10">완료된 게임 기록이 없습니다.</p>
       )}
 
-      <div className="w-full space-y-4 overflow-y-auto pr-2 pb-20">
-        {history.map((room, idx) => (
-          <div key={idx} className="bg-surface-card border-2 border-border p-5 rounded-xl space-y-4 shadow-sm hover:border-primary/30 transition-colors">
-            <div className="flex justify-between items-center border-b border-border/50 pb-3">
-              <span className="font-bold text-lg text-primary">ROOM: {room.roomId}</span>
-              <span className="text-sm text-text-tertiary">
-                {room.timestamp ? new Date(room.timestamp).toLocaleString() : '시간 정보 없음'}
-              </span>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-text-secondary">최종 결과 (직업)</h3>
-              <div className="flex flex-wrap gap-2">
-                {room.players && Object.keys(room.players).map(uid => (
-                  <div key={uid} className="bg-input-background border border-border px-3 py-1.5 rounded-lg text-sm">
-                    <span className="font-medium text-foreground">{room.players[uid]?.nickname}</span>
-                    <span className="mx-2 text-text-tertiary">|</span>
-                    <span className="text-primary font-bold">{room.game?.currentRoles?.[uid] || '알 수 없음'}</span>
-                  </div>
-                ))}
+      <div className="w-full space-y-8 overflow-y-auto pr-2 pb-20">
+        {history.map((room, idx) => {
+          const players = room.players || {};
+          const initialRoles = room.game?.initialRoles || {};
+          const finalRoles = room.game?.currentRoles || {};
+          const nightResults = room.game?.nightResults || {};
+          const votes = room.game?.votes || {};
+
+          // 투표 집계
+          const voteCounts: Record<string, number> = {};
+          Object.values(votes).forEach((targetUid: any) => {
+            voteCounts[targetUid] = (voteCounts[targetUid] || 0) + 1;
+          });
+          const maxVotes = Math.max(...Object.values(voteCounts) as number[], 0);
+          const deadPlayers = maxVotes > 1 ? Object.keys(voteCounts).filter(uid => voteCounts[uid] === maxVotes) : [];
+
+          return (
+            <div key={idx} className="bg-surface-card border-2 border-border rounded-xl shadow-sm hover:border-primary/30 transition-colors overflow-hidden">
+              <div className="bg-surface-dark-elevated p-4 border-b border-border flex justify-between items-center">
+                <span className="font-bold text-lg text-primary">
+                  {room.timestamp ? new Date(room.timestamp).toLocaleString() : '시간 정보 없음'}
+                </span>
+              </div>
+              
+              <div className="p-4 space-y-6">
+                <div>
+                  <h3 className="font-medium text-text-primary mb-3">처형된 플레이어</h3>
+                  {deadPlayers.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {deadPlayers.map(uid => (
+                        <div key={uid} className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-2 rounded-lg font-bold shadow-sm">
+                          {players[uid]?.nickname}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-text-tertiary text-sm">아무도 처형되지 않았습니다.</p>
+                  )}
+                </div>
+
+                <div className="border-t border-border pt-6">
+                  <ul className="space-y-3">
+                    {Object.keys(players)
+                      .sort((a, b) => (rolePriority[initialRoles[a]] || 99) - (rolePriority[initialRoles[b]] || 99))
+                      .map(uid => {
+                        const initRole = initialRoles[uid];
+                        const finalRole = finalRoles[uid];
+                        const changed = initRole !== finalRole;
+                        
+                        const myVote = votes[uid];
+                        const myVoteTargetName = myVote ? players[myVote]?.nickname : '투표 안함';
+                        const receivedVotes = voteCounts[uid] || 0;
+                        
+                        return (
+                          <li key={uid} className="flex flex-col p-4 rounded-xl bg-input-background border border-border space-y-3 shadow-sm">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-lg text-foreground flex items-center gap-2">
+                                {players[uid]?.nickname}
+                                {receivedVotes > 0 && <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">{receivedVotes}표 받음</span>}
+                              </span>
+                              <div className="flex items-center gap-2 text-sm">
+                                {changed ? (
+                                  <>
+                                    <span className="text-text-tertiary line-through">{roleNameMap[initRole] || initRole}</span>
+                                    <span className="text-text-tertiary">➔</span>
+                                    <span className="text-primary font-bold">{roleNameMap[finalRole] || finalRole}</span>
+                                  </>
+                                ) : (
+                                  <span className="text-primary font-bold">{roleNameMap[finalRole] || finalRole}</span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="text-sm text-text-secondary bg-surface-card p-2 rounded border border-border/50">
+                              <span className="font-semibold">투표 →</span> {myVoteTargetName}
+                            </div>
+                            
+                            {nightResults[uid] && (
+                              <div className="text-sm text-text-secondary bg-primary/5 p-2 rounded border border-primary/20 whitespace-pre-wrap">
+                                {nightResults[uid]}
+                              </div>
+                            )}
+                          </li>
+                        );
+                    })}
+                  </ul>
+                </div>
               </div>
             </div>
-            
-            {/* 처형된 플레이어 표시 */}
-            {room.game?.votes && (
-              <div className="space-y-2 pt-2">
-                <h3 className="text-sm font-semibold text-destructive">처형 결과</h3>
-                <p className="text-sm text-foreground bg-destructive/10 px-3 py-2 rounded-lg">
-                  {(() => {
-                    const votes = room.game.votes;
-                    const counts: Record<string, number> = {};
-                    Object.values(votes).forEach((t: any) => counts[t] = (counts[t] || 0) + 1);
-                    const max = Math.max(...Object.values(counts) as number[], 0);
-                    const dead = Object.keys(counts).filter(k => counts[k] === max && max > 1);
-                    if (dead.length > 0) {
-                      return dead.map(k => room.players?.[k]?.nickname).join(', ') + ' 처형됨';
-                    }
-                    return '아무도 처형되지 않았습니다.';
-                  })()}
-                </p>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

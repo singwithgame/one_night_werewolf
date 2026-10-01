@@ -122,9 +122,9 @@ export default function EndPage() {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-500 w-full text-center">
-      <div className="space-y-1 mt-4">
+      <div className="space-y-1 mt-4 w-full">
         <h1 className="font-display text-4xl font-bold text-primary tracking-tight">Game Over</h1>
-        <div className="bg-surface-dark-elevated border border-border p-6 rounded-xl mt-4 shadow-lg w-full">
+        <div className="bg-surface-dark-elevated border border-border p-6 rounded-xl mt-8 shadow-lg w-full">
           <p className="text-xl font-bold text-foreground mb-1">{winningTeam} 승리!</p>
           <p className="text-sm text-text-secondary">{winReason}</p>
         </div>
@@ -148,7 +148,23 @@ export default function EndPage() {
 
         <div className="border-t border-border pt-6">
           <ul className="space-y-3">
-            {Object.keys(players).map(uid => {
+{(() => {
+              const rolePriority: Record<string, number> = {
+                DOPPELGANGER: 1,
+                WEREWOLF: 2,
+                MINION: 3,
+                MASON: 4,
+                SEER: 5,
+                ROBBER: 6,
+                TROUBLEMAKER: 7,
+                DRUNK: 8,
+                INSOMNIAC: 9,
+                HUNTER: 10,
+                TANNER: 11,
+                VILLAGER: 12
+              };
+              
+              return Object.keys(players).sort((a, b) => (rolePriority[initialRoles[a]] || 99) - (rolePriority[initialRoles[b]] || 99)).map(uid => {
               const initRole = initialRoles[uid];
               const finalRole = finalRoles[uid];
               const changed = initRole !== finalRole;
@@ -178,18 +194,17 @@ export default function EndPage() {
                   </div>
                   
                   <div className="text-sm text-text-secondary bg-surface-card p-2 rounded border border-border/50">
-                    <span className="font-semibold">투표:</span> {myVoteTargetName}에게 투표함
+                    <span className="font-semibold">투표 →</span> {myVoteTargetName}
                   </div>
                   
                   {nightResults[uid] && (
                     <div className="text-sm text-text-secondary bg-primary/5 p-2 rounded border border-primary/20 whitespace-pre-wrap">
-                      <span className="font-semibold text-primary">밤 행동 결과:</span><br/>
                       {nightResults[uid]}
                     </div>
                   )}
                 </li>
               );
-            })}
+            })})()}
           </ul>
         </div>
       </div>

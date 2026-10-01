@@ -87,7 +87,7 @@ export default function NightResultPage() {
 
   useEffect(() => {
     // 플레이어들이 모두 확인했는지 카운트만 계산
-    if (!roomId || !isHost) return;
+    if (!roomId) return;
     const readyRef = ref(db, `rooms/${roomId}/game/resultReady`);
     const playersRef = ref(db, `rooms/${roomId}/players`);
     
@@ -173,11 +173,11 @@ export default function NightResultPage() {
                   required
                 />
                 <button type="submit" className="bg-primary text-primary-foreground px-4 rounded-md font-medium">
-                  완료
+                  완료 ({readyCount} / {totalCount})
                 </button>
               </form>
             ) : (
-              <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중...</p>
+              <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중... ({readyCount} / {totalCount})</p>
             )}
           </div>
         ) : (
@@ -185,16 +185,20 @@ export default function NightResultPage() {
         )}
       </div>
 
+      <p className="text-sm text-destructive font-medium bg-destructive/10 px-4 py-2 rounded-lg">
+        ※ 이 내용은 낮이 되면 다른 플레이어에게 공유되지 않습니다.
+      </p>
+      
       {resultMessage !== 'NONE' && (
         !hasChecked ? (
           <button 
             onClick={handleCheckDone}
             className="w-full px-6 py-4 bg-primary text-primary-foreground rounded-full font-medium tracking-wide hover:opacity-90 transition-opacity"
           >
-            확인 완료
+            확인 완료 ({readyCount} / {totalCount})
           </button>
         ) : (
-          <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중...</p>
+          <p className="text-text-tertiary">다른 플레이어들이 확인하기를 기다리는 중... ({readyCount} / {totalCount})</p>
         )
       )}
 
