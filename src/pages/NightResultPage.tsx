@@ -35,9 +35,14 @@ export default function NightResultPage() {
         });
       }
     });
+
+    const choiceRef = ref(db, `rooms/${roomId}/game/loneWolfChoices/${uid}`);
+    const unsubChoice = onValue(choiceRef, (snap) => {
+      if (snap.exists()) setRevealedCenter(snap.val());
+    });
     
-    return () => { unsubCenter(); unsubInitCenter(); };
-  }, [roomId]);
+    return () => { unsubCenter(); unsubInitCenter(); unsubChoice(); };
+  }, [roomId, uid]);
 
   useEffect(() => {
     setMathProblem({
@@ -141,7 +146,7 @@ export default function NightResultPage() {
                 <button
                   key={idx}
                   disabled={revealedCenter !== null}
-                  onClick={() => setRevealedCenter(idx)}
+                  onClick={() => { setRevealedCenter(idx); update(ref(db, `rooms/${roomId}/game/loneWolfChoices`), { [uid]: idx }); }}
                   className={`w-20 h-28 rounded-lg font-bold transition-all shadow-md flex items-center justify-center ${
                     revealedCenter === idx 
                     ? 'bg-primary text-primary-foreground scale-105' 
