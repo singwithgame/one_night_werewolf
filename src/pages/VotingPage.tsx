@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ref, onValue, update } from 'firebase/database';
 import { db, getLocalUid } from '../lib/firebase';
 import { useGameStore } from '../store/gameStore';
@@ -71,6 +71,10 @@ export default function VotingPage() {
   const votedCount = Object.keys(votes).length;
   const allVoted = votedCount === players.length && players.length > 0;
 
+  const shuffledPlayers = useMemo(() => {
+    return [...players].sort(() => Math.random() - 0.5);
+  }, [players.length]);
+
   return (
     <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500 w-full text-center">
       <div className="space-y-2">
@@ -83,7 +87,7 @@ export default function VotingPage() {
 
       <div className="w-full max-w-sm relative">
         <div className="bg-surface-card border border-border rounded-xl p-4 shadow-sm h-72 overflow-y-auto space-y-3 snap-y snap-mandatory scrollbar-hide py-8">
-          {players.map(p => (
+          {shuffledPlayers.map(p => (
             <button
               key={p.uid}
               onClick={() => handleVote(p.uid)}
