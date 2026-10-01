@@ -277,7 +277,7 @@ const calculateNightActions = async (roomId: string) => {
   Object.keys(actions).forEach(uid => {
     if (uid.includes('_doppelganger')) {
       const act = actions[uid];
-      results[uid.replace('_doppelganger', '')] = `${getNickname(act.target)}님의 직업([${roleNameMap[act.copiedRole]}])을 복사했습니다.`;
+      results[uid.replace('_doppelganger', '')] = `${getNickname(act.target)}님의 직업[${roleNameMap[act.copiedRole]}]을 복사했습니다.`;
       currentRoles[uid.replace('_doppelganger', '')] = act.copiedRole;
     }
   });
@@ -317,7 +317,7 @@ const calculateNightActions = async (roomId: string) => {
       const stolenRole = currentRoles[target];
       currentRoles[target] = currentRoles[uid];
       currentRoles[uid] = stolenRole;
-      results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신은 ${getNickname(target)}님의 카드([${roleNameMap[stolenRole]}])를 훔쳤습니다.`;
+      results[uid] = (results[uid] ? results[uid] + '\n' : '') + `당신은 ${getNickname(target)}님의 카드[${roleNameMap[stolenRole]}]를 훔쳤습니다.`;
     }
     else if (act.type === 'TROUBLEMAKER') {
       const t1 = act.targets[0];

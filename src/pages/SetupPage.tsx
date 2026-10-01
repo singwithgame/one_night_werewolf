@@ -241,9 +241,9 @@ export default function SetupPage() {
                 </span>
                 {isHost ? (
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleRoleCountChange(role.id, -1)} disabled={count === 0} className="w-6 h-6 rounded-full bg-muted flex items-center justify-center disabled:opacity-30">-</button>
+                    <button onClick={() => handleRoleCountChange(role.id, -1)} disabled={count === 0 || role.id === 'WEREWOLF'} className="w-6 h-6 rounded-full bg-muted flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">-</button>
                     <span className="text-sm font-medium w-4 text-center">{count}</span>
-                    <button onClick={() => handleRoleCountChange(role.id, 1)} disabled={count === role.max} className="w-6 h-6 rounded-full bg-muted flex items-center justify-center disabled:opacity-30">+</button>
+                    <button onClick={() => handleRoleCountChange(role.id, 1)} disabled={count === role.max || role.id === 'WEREWOLF' || (role.id === 'MASON' ? deck.length + 2 > requiredCards : deck.length >= requiredCards)} className="w-6 h-6 rounded-full bg-muted flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">+</button>
                   </div>
                 ) : (
                   <span className="text-sm font-medium">{count}장</span>
