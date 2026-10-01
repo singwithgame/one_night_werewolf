@@ -148,6 +148,7 @@ export default function LobbyPage() {
             <div className="grid grid-cols-3 gap-3">
               {[3, 5, 10].map(min => (
                 <button
+                  type="button"
                   key={min}
                   onClick={() => setTimeLimit(min * 60)}
                   className={`py-3 rounded-xl border-2 font-medium transition-all active:scale-95 ${

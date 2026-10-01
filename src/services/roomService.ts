@@ -13,6 +13,24 @@ const generateRoomCode = () => {
 
 // 방 생성
 export const createRoom = async (hostUid: string, nickname: string, timeLimit: number): Promise<string> => {
+  // 생성 전 오래된 방 청소 (1주일 초과)
+  try {
+    const allRoomsSnap = await get(ref(db, 'rooms'));
+    if (allRoomsSnap.exists()) {
+      const rooms = allRoomsSnap.val();
+      const now = Date.now();
+      const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+      Object.keys(rooms).forEach(key => {
+        const room = rooms[key];
+        if (room.info && room.info.createdAt && (now - room.info.createdAt > ONE_WEEK)) {
+          set(ref(db, `rooms/${key}`), null);
+        }
+      });
+    }
+  } catch (e) {
+    console.error("오래된 방 정리 실패:", e);
+  }
+
   const roomCode = generateRoomCode();
   const roomRef = ref(db, `rooms/${roomCode}`);
   

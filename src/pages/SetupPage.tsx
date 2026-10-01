@@ -69,10 +69,24 @@ export default function SetupPage() {
         if (newPhase !== 'SETUP') {
           setPhase(newPhase);
         }
+      } else {
+        setPhase('LOBBY');
       }
     });
     return () => unsubscribe();
   }, [roomId, setPhase]);
+
+  const handleLeaveRoom = async () => {
+    if (!roomId || !uid) return;
+    if (isHost) {
+      const { set } = await import('firebase/database');
+      await set(ref(db, `rooms/${roomId}`), null);
+    } else {
+      const { set } = await import('firebase/database');
+      await set(ref(db, `rooms/${roomId}/players/${uid}`), null);
+    }
+    setPhase('LOBBY');
+  };
 
   const toggleReady = async () => {
     if (!roomId || !uid) return;
@@ -253,6 +267,12 @@ export default function SetupPage() {
           {loading ? '시작 준비 중...' : '게임 시작하기'}
         </button>
       )}
+      <button 
+        onClick={handleLeaveRoom}
+        className="w-full mt-4 text-text-tertiary underline hover:text-destructive transition-colors text-sm"
+      >
+        대기실에서 나가기
+      </button>
     </div>
   );
 }
